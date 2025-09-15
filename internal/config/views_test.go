@@ -87,10 +87,12 @@ func TestViewSettingEquals(t *testing.T) {
 
 		"same": {
 			v1: &config.ViewSetting{
-				Columns: []string{"A", "B", "C"},
+				Columns:  []string{"A", "B", "C"},
+				SortKeys: []string{"A:Shift-0"},
 			},
 			v2: &config.ViewSetting{
-				Columns: []string{"A", "B", "C"},
+				Columns:  []string{"A", "B", "C"},
+				SortKeys: []string{"A:Shift-0"},
 			},
 			e: true,
 		},
@@ -111,6 +113,18 @@ func TestViewSettingEquals(t *testing.T) {
 			v2: &config.ViewSetting{
 				Columns: []string{"B"},
 			},
+		},
+
+		"sort-keys-false": {
+			v1: &config.ViewSetting{
+				Columns:  []string{"A"},
+				SortKeys: []string{"A:Shift-0"},
+			},
+			v2: &config.ViewSetting{
+				Columns:  []string{"A"},
+				SortKeys: []string{"B:Shift-0"},
+			},
+			e: false,
 		},
 	}
 

@@ -35,6 +35,7 @@ type ViewConfigListener interface {
 type ViewSetting struct {
 	Columns    []string `yaml:"columns"`
 	SortColumn string   `yaml:"sortColumn"`
+	SortKeys   []string `yaml:"sortKeys"`
 }
 
 func (v *ViewSetting) HasCols() bool {
@@ -67,6 +68,9 @@ func (v *ViewSetting) Equals(vs *ViewSetting) bool {
 	}
 
 	if c := slices.Compare(v.Columns, vs.Columns); c != 0 {
+		return false
+	}
+	if c := slices.Compare(v.SortKeys, vs.SortKeys); c != 0 {
 		return false
 	}
 

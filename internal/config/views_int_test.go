@@ -65,6 +65,14 @@ func TestCustomView_getVS(t *testing.T) {
 			gvr: client.SvcGVR.String(),
 			ns:  "zorg",
 		},
+
+		"sort-keys": {
+			gvr: client.PodGVR.String(),
+			e: &ViewSetting{
+				Columns:  []string{"NAMESPACE", "NAME", "AGE", "IP", "CUSTOM"},
+				SortKeys: []string{"CUSTOM:Shift-0"},
+			},
+		},
 	}
 
 	v := NewCustomView()

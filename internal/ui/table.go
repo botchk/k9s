@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"sync"
 
 	"github.com/derailed/k9s/internal"
@@ -16,6 +17,7 @@ import (
 	"github.com/derailed/k9s/internal/model1"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/slogs"
+
 	"github.com/derailed/k9s/internal/vul"
 	"github.com/derailed/tcell/v2"
 	"github.com/derailed/tview"
@@ -190,9 +192,40 @@ func (t *Table) ViewSettingsChanged(vs *config.ViewSetting) {
 			}
 		} else {
 			t.setMSort(false)
+			// TODO: add tests, but where?
+			for _, sortKey := range vs.SortKeys {
+				slog.Debug("Binding sort key", slog.String("key", sortKey))
+				// split string KEY:VALUE by double colon
+				parts := strings.SplitN(sortKey, ":", 2)
+				name := parts[0]
+				value := parts[1]
+				// TODO introduce key error override handling similar as in actions.go
+				key, err := asKey(value)
+				if err != nil {
+					slog.Debug("Invalid key",
+						slog.String("key", value),
+						slogs.Error, err,
+					)
+				} else {
+					slog.Debug("Binding sort key", slog.String("key", value), slog.String("for", name))
+					//TODO: allow configuration of visible in the config e.g., LABEL:Shift-k|true (default: false)
+					t.Actions().Add(key, NewKeyAction("Sort "+name, t.SortColCmd(name, true), true))
+				}
+			}
 		}
 		t.Refresh()
 	}
+}
+
+// AsKey maps a string representation of a key to a tcell key.
+func asKey(key string) (tcell.Key, error) {
+	for k, v := range tcell.KeyNames {
+		if key == v {
+			return k, nil
+		}
+	}
+
+	return 0, fmt.Errorf("invalid key specified: %q", key)
 }
 
 // StylesChanged notifies the skin changed.
