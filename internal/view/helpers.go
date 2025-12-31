@@ -6,7 +6,6 @@ package view
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"os"
 	"regexp"
@@ -184,17 +183,6 @@ func extractApp(ctx context.Context) (*App, error) {
 	}
 
 	return app, nil
-}
-
-// AsKey maps a string representation of a key to a tcell key.
-func asKey(key string) (tcell.Key, error) {
-	for k, v := range tcell.KeyNames {
-		if key == v {
-			return k, nil
-		}
-	}
-
-	return 0, fmt.Errorf("invalid key specified: %q", key)
 }
 
 // FwFQN returns a fully qualified ns/name:container id.

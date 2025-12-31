@@ -10,3 +10,5 @@ views:
       - NAMESPACE
       - ENDPOINTS
       - AGE
+    sortKeys:
+      - AGE:Shift-0

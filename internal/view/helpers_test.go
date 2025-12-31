@@ -15,7 +15,6 @@ import (
 	"github.com/derailed/k9s/internal/config/mock"
 	"github.com/derailed/k9s/internal/model1"
 	"github.com/derailed/k9s/internal/render"
-	"github.com/derailed/tcell/v2"
 	"github.com/sahilm/fuzzy"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -98,26 +97,6 @@ func TestFwFQN(t *testing.T) {
 		u := uu[k]
 		t.Run(k, func(t *testing.T) {
 			assert.Equal(t, u.e, fwFQN(u.po, u.co))
-		})
-	}
-}
-
-func TestAsKey(t *testing.T) {
-	uu := map[string]struct {
-		k   string
-		err error
-		e   tcell.Key
-	}{
-		"cool": {k: "Ctrl-A", e: tcell.KeyCtrlA},
-		"miss": {k: "fred", e: 0, err: errors.New(`invalid key specified: "fred"`)},
-	}
-
-	for k := range uu {
-		u := uu[k]
-		t.Run(k, func(t *testing.T) {
-			key, err := asKey(u.k)
-			assert.Equal(t, u.err, err)
-			assert.Equal(t, u.e, key)
 		})
 	}
 }

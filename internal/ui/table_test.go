@@ -15,6 +15,7 @@ import (
 	"github.com/derailed/k9s/internal/model"
 	"github.com/derailed/k9s/internal/model1"
 	"github.com/derailed/k9s/internal/ui"
+	"github.com/derailed/tcell/v2"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -63,6 +64,48 @@ func TestTableSelection(t *testing.T) {
 	v.SelectFirstRow()
 	assert.Equal(t, 1, v.GetSelectedRowIndex())
 }
+
+func TestRegisterCustomSortKeys(t *testing.T) {
+	table := ui.NewTable(nil)
+	vs := &config.ViewSetting{
+		Columns: []string{"NAME", "AGE"},
+		SortKeys: []string{
+			"NAME:Enter",        // valid
+			"AGE:NotAKey",       // invalid key
+			"NAMESPACE:Shift-0", // column not found
+			"BADENTRY",          // malformed
+		},
+	}
+	table.RegisterCustomSortKeys(vs)
+
+	action, ok := table.Actions().Get(tcell.KeyEnter)
+	assert.Equal(t, table.Actions().Len(), 1)
+	assert.True(t, ok, "Expected action for NAME:Enter")
+	assert.Equal(t, "Sort NAME", action.Description)
+}
+
+func TestParseCustomSortKey(t *testing.T) {
+	columns := []string{"NAME", "AGE"}
+
+	col, key, err := ui.ParseCustomSortKey("NAME:Enter", columns)
+	assert.NoError(t, err)
+	assert.Equal(t, "NAME", col)
+	assert.Equal(t, tcell.KeyEnter, key)
+
+	_, _, err = ui.ParseCustomSortKey("BADENTRY", columns)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "malformed SortKeys entry, expected 'column:key' format")
+
+	_, _, err = ui.ParseCustomSortKey("NAMESPACE:Shift-0", columns)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "sortKeys column not found in Columns")
+
+	_, _, err = ui.ParseCustomSortKey("AGE:NotAKey", columns)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid key name in SortKeys entry: invalid key specified: \"NotAKey\"")
+}
+
+// TODO test scenario where validation loading throws an error but sortKeys are still trying to be loaded
 
 // ----------------------------------------------------------------------------
 // Helpers...

@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"sync"
 
 	"github.com/derailed/k9s/internal"
@@ -322,6 +323,7 @@ func (t *Table) ViewSettingsChanged(vs *config.ViewSetting) {
 			}
 		} else {
 			t.setMSort(false)
+			t.RegisterCustomSortKeys(vs)
 		}
 		t.Refresh()
 	}
@@ -730,5 +732,43 @@ func ROIndicator(ro, noIC bool) string {
 		return lockedIC
 	default:
 		return unlockedIC
+	}
+}
+
+// ParseCustomSortKey parses a custom sort key entry and validates the column and key.
+// Returns the column name, tcell.Key, and error if any.
+func ParseCustomSortKey(entry string, columns []string) (string, tcell.Key, error) {
+	parts := strings.SplitN(entry, ":", 2)
+	if len(parts) != 2 {
+		return "", 0, fmt.Errorf("malformed SortKeys entry, expected 'column:key' format")
+	}
+	sortCol, keyStr := parts[0], parts[1]
+	validCol := false
+	for _, col := range columns {
+		if col == sortCol {
+			validCol = true
+			break
+		}
+	}
+	if !validCol {
+		return sortCol, 0, fmt.Errorf("sortKeys column not found in Columns")
+	}
+	key, err := StringAsKey(keyStr)
+	if err != nil {
+		return sortCol, 0, fmt.Errorf("invalid key name in SortKeys entry: %w", err)
+	}
+	return sortCol, key, nil
+}
+
+// RegisterCustomSortKeys registers key bindings for custom sort columns from a given ViewSetting.
+func (t *Table) RegisterCustomSortKeys(vs *config.ViewSetting) {
+	for _, entry := range vs.SortKeys {
+		col, key, err := ParseCustomSortKey(entry, vs.Columns)
+		if err != nil {
+			slog.Warn("Failed to parse custom view sortKeys", "error", err.Error(), "entry", entry)
+			continue
+		}
+		desc := "Sort " + col
+		t.actions.Add(key, NewKeyAction(desc, t.SortColCmd(col, true), true))
 	}
 }

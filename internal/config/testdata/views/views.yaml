@@ -23,3 +23,5 @@ views:
       - DUH
       - BLAH
       - BLEE
+    sortKeys:
+      - BLAH:Shift-0
