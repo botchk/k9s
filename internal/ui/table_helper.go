@@ -13,6 +13,7 @@ import (
 	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/config"
 	"github.com/derailed/k9s/internal/slogs"
+	"github.com/derailed/tcell/v2"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -111,4 +112,15 @@ func formatCell(field string, padding int) string {
 	}
 
 	return field
+}
+
+// StringAsKey maps a string representation of a key to a tcell key.
+func StringAsKey(key string) (tcell.Key, error) {
+	for k, v := range tcell.KeyNames {
+		if key == v {
+			return k, nil
+		}
+	}
+
+	return 0, fmt.Errorf("invalid key specified: %q", key)
 }

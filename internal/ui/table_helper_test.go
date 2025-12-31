@@ -4,9 +4,11 @@
 package ui
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/derailed/k9s/internal/render"
+	"github.com/derailed/tcell/v2"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/labels"
 )
@@ -58,6 +60,26 @@ func TestExtractLabelSelector(t *testing.T) {
 			sel, err := ExtractLabelSelector(u.sel)
 			assert.Equal(t, u.err, err)
 			assert.Equal(t, u.e, sel)
+		})
+	}
+}
+
+func TestStringAsKey(t *testing.T) {
+	uu := map[string]struct {
+		k   string
+		err error
+		e   tcell.Key
+	}{
+		"cool": {k: "Ctrl-A", e: tcell.KeyCtrlA},
+		"miss": {k: "fred", e: 0, err: errors.New(`invalid key specified: "fred"`)},
+	}
+
+	for k := range uu {
+		u := uu[k]
+		t.Run(k, func(t *testing.T) {
+			key, err := StringAsKey(u.k)
+			assert.Equal(t, u.err, err)
+			assert.Equal(t, u.e, key)
 		})
 	}
 }
