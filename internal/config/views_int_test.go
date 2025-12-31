@@ -49,7 +49,8 @@ func TestCustomView_getVS(t *testing.T) {
 		"alias": {
 			gvr: "bozo",
 			e: &ViewSetting{
-				Columns: []string{"DUH", "BLAH", "BLEE"},
+				Columns:  []string{"DUH", "BLAH", "BLEE"},
+				SortKeys: []string{"BLAH:Shift-0"},
 			},
 		},
 
