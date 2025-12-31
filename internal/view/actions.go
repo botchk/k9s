@@ -70,7 +70,7 @@ func hotKeyActions(r Runner, aa *ui.KeyActions) error {
 		errs = errors.Join(errs, err)
 	}
 	for k, hk := range hh.HotKey {
-		key, err := asKey(hk.ShortCut)
+		key, err := ui.StringAsKey(hk.ShortCut)
 		if err != nil {
 			errs = errors.Join(errs, err)
 			continue
@@ -137,7 +137,7 @@ func pluginActions(r Runner, aa *ui.KeyActions) error {
 		if !inScope(pp.Plugins[k].Scopes, aliases) || (ro && pp.Plugins[k].Dangerous) {
 			continue
 		}
-		key, err := asKey(pp.Plugins[k].ShortCut)
+		key, err := ui.StringAsKey(pp.Plugins[k].ShortCut)
 		if err != nil {
 			errs = errors.Join(errs, err)
 			continue
